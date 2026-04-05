@@ -7,11 +7,6 @@ from pathlib import Path
 from PIL import Image
 from packaging import version
 
-try:
-    from tensorflow import __version__ as tf_version
-except ImportError:
-    tf_version = '0.0.0'
-
 from html import escape as html_esc
 
 from modules import ui  # pylint: disable=import-error
@@ -53,7 +48,7 @@ def unload_interrogators() -> Tuple[str]:
             else:
                 remaining_models = remaining_models + f'<li>{i.name}</li>'
     if remaining_models != '':
-        remaining_models = remaining_models + "Some tensorflow models could "\
+        remaining_models = remaining_models + "Some models could "\
                            "not be unloaded, a known issue."
     QData.clear(1)
 
@@ -384,15 +379,6 @@ def on_ui_tabs():
                                 )
                                 with gr.Row(variant='compact'):
                                     with gr.Column(variant='panel'):
-                                        large_query = utils.preset.component(
-                                            gr.Checkbox,
-                                            label='huge batch query (TF 2.10, '
-                                            'experimental)',
-                                            value=False,
-                                            interactive=version.parse(tf_version) ==
-                                            version.parse('2.10')
-                                        )
-                                    with gr.Column(variant='panel'):
                                         save_tags = utils.preset.component(
                                             gr.Checkbox,
                                             label='Save to tags files',
@@ -573,7 +559,6 @@ def on_ui_tabs():
         # register events
         # Checkboxes
         cumulative.input(fn=It.flip('cumulative'), inputs=[], outputs=[])
-        large_query.input(fn=It.flip('large_query'), inputs=[], outputs=[])
         unload_after.input(fn=It.flip('unload_after'), inputs=[], outputs=[])
 
         save_tags.input(fn=IOData.flip_save_tags(), inputs=[], outputs=[])

@@ -1,4 +1,3 @@
-deepdanbooru
 jsonschema
 fastapi
 gradio
@@ -10,6 +9,5 @@ opencv_python_headless
 packaging
 pandas
 Pillow
-tensorflow
 tqdm
 onnxruntime>=1.17.0

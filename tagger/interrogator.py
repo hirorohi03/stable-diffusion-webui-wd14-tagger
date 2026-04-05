@@ -50,7 +50,6 @@ class Interrogator:
     # the raw input and output.
     input = {
         "cumulative": False,
-        "large_query": False,
         "unload_after": False,
         "add": '',
         "keep": '',
@@ -206,27 +205,17 @@ class Interrogator:
         """ Interrogate all images in the input list """
         QData.clear(1 - Interrogator.input["cumulative"])
 
-        if Interrogator.input["large_query"] is True and self.run_mode < 2:
-            # TODO: write specified tags files instead of simple .txt
-            image_list = [str(x[0].resolve()) for x in IOData.paths]
-            self.large_batch_interrogate(image_list, self.run_mode == 0)
+        verb = getattr(shared.opts, 'tagger_verbose', True)
+        count = len(QData.query)
 
-            # alternating dry run and run modes
-            self.run_mode = (self.run_mode + 1) % 2
-            count = len(image_list)
-            Interrogator.output = QData.finalize(count)
-        else:
-            verb = getattr(shared.opts, 'tagger_verbose', True)
-            count = len(QData.query)
+        for i in tqdm(range(len(IOData.paths)), disable=verb, desc='Tags'):
+            self.batch_interrogate_image(i)
 
-            for i in tqdm(range(len(IOData.paths)), disable=verb, desc='Tags'):
-                self.batch_interrogate_image(i)
+        if Interrogator.input["unload_after"]:
+            self.unload()
 
-            if Interrogator.input["unload_after"]:
-                self.unload()
-
-            count = len(QData.query) - count
-            Interrogator.output = QData.finalize_batch(count)
+        count = len(QData.query) - count
+        Interrogator.output = QData.finalize_batch(count)
 
     def interrogate(
         self,
@@ -235,101 +224,6 @@ class Interrogator:
         Dict[str, float],  # rating confidences
         Dict[str, float]  # tag confidences
     ]:
-        raise NotImplementedError()
-
-
-class DeepDanbooruInterrogator(Interrogator):
-    """ Interrogator for DeepDanbooru models """
-    def __init__(self, name: str, project_path: os.PathLike) -> None:
-        super().__init__(name)
-        self.project_path = project_path
-        self.model = None
-        self.tags = None
-
-    def load(self) -> None:
-        print(f'Loading {self.name} from {str(self.project_path)}')
-
-        # deepdanbooru package is not include in web-sd anymore
-        # https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/c81d440d876dfd2ab3560410f37442ef56fc663
-        from launch import is_installed, run_pip
-        if not is_installed('deepdanbooru'):
-            package = os.environ.get(
-                'DEEPDANBOORU_PACKAGE',
-                'git+https://github.com/KichangKim/DeepDanbooru.'
-                'git@d91a2963bf87c6a770d74894667e9ffa9f6de7ff'
-            )
-
-            run_pip(
-                f'install {package} tensorflow tensorflow-io', 'deepdanbooru')
-
-        import tensorflow as tf
-
-        # tensorflow maps nearly all vram by default, so we limit this
-        # https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
-        # TODO: only run on the first run
-        for device in tf.config.experimental.list_physical_devices('GPU'):
-            try:
-                tf.config.experimental.set_memory_growth(device, True)
-            except RuntimeError as err:
-                print(err)
-
-        with tf.device(TF_DEVICE_NAME):
-            import deepdanbooru.project as ddp
-
-            self.model = ddp.load_model_from_project(
-                project_path=self.project_path,
-                compile_model=False
-            )
-
-            print(f'Loaded {self.name} model from {str(self.project_path)}')
-
-            self.tags = ddp.load_tags_from_project(
-                project_path=self.project_path
-            )
-
-    def unload(self) -> bool:
-        return False
-
-    def interrogate(
-        self,
-        image: Image
-    ) -> Tuple[
-        Dict[str, float],  # rating confidences
-        Dict[str, float]  # tag confidences
-    ]:
-        # init model
-        if self.model is None:
-            self.load()
-
-        import deepdanbooru.data as ddd
-
-        # convert an image to fit the model
-        image_bufs = io.BytesIO()
-        image.save(image_bufs, format='PNG')
-        image = ddd.load_image_for_evaluate(
-            image_bufs,
-            self.model.input_shape[2],
-            self.model.input_shape[1]
-        )
-
-        image = image.reshape((1, *image.shape[0:3]))
-
-        # evaluate model
-        result = self.model.predict(image)
-
-        confidences = result[0].tolist()
-        ratings = {}
-        tags = {}
-
-        for i, tag in enumerate(self.tags):
-            if tag[:7] != "rating:":
-                tags[tag] = confidences[i]
-            else:
-                ratings[tag[7:]] = confidences[i]
-
-        return ratings, tags
-
-    def large_batch_interrogate(self, images: List, dry_run=False) -> str:
         raise NotImplementedError()
 
 
@@ -532,56 +426,6 @@ class WaifuDiffusionInterrogator(Interrogator):
                     filename.write(tags_string)
         return images, process_images
 
-    def large_batch_interrogate(self, images, dry_run=True) -> None:
-        """ Interrogate a large batch of images. """
-
-        # init model
-        if not hasattr(self, 'model') or self.model is None:
-            self.load()
-
-        os.environ["TF_XLA_FLAGS"] = '--tf_xla_auto_jit=2 '\
-                                     '--tf_xla_cpu_global_jit'
-        # Reduce logging
-        # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-
-        import tensorflow as tf
-
-        from tagger.generator.tf_data_reader import DataGenerator
-
-        # tensorflow maps nearly all vram by default, so we limit this
-        # https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
-        # TODO: only run on the first run
-        gpus = tf.config.experimental.list_physical_devices("GPU")
-        if gpus:
-            for device in gpus:
-                try:
-                    tf.config.experimental.set_memory_growth(device, True)
-                except RuntimeError as err:
-                    print(err)
-
-        if dry_run:  # dry run
-            height, width = 224, 224
-            process_images = self.dry_run(images)
-        else:
-            _, height, width, _ = self.model.inputs[0].shape
-
-            @tf.function
-            def pred_model(model):
-                return self.model(model, training=False)
-
-            process_images = self.run(images, pred_model)
-
-        generator = DataGenerator(
-            file_list=images, target_height=height, target_width=width,
-            batch_size=getattr(shared.opts, 'tagger_batch_size', 1024)
-        ).gen_ds()
-
-        orig_add_tags = QData.add_tags
-        for filepaths, image_list in tqdm(generator):
-            process_images(filepaths, image_list)
-        QData.add_tag = orig_add_tags
-        del os.environ["TF_XLA_FLAGS"]
-
 
 class MLDanbooruInterrogator(Interrogator):
     """ Interrogator for the MLDanbooru model. """
@@ -655,9 +499,6 @@ class MLDanbooruInterrogator(Interrogator):
 
         tags = {tag: float(conf) for tag, conf in zip(self.tags, y.flatten())}
         return {}, tags
-
-    def large_batch_interrogate(self, images: List, dry_run=False) -> str:
-        raise NotImplementedError()
 
 
 class Z3DInterrogator(Interrogator):
@@ -830,53 +671,3 @@ class Z3DInterrogator(Interrogator):
                 with io.open(txtfile, "w", encoding="utf-8") as filename:
                     filename.write(tags_string)
         return images, process_images
-
-    def large_batch_interrogate(self, images, dry_run=True) -> None:
-        """ Interrogate a large batch of images. """
-
-        # init model
-        if not hasattr(self, 'model') or self.model is None:
-            self.load()
-
-        os.environ["TF_XLA_FLAGS"] = '--tf_xla_auto_jit=2 '\
-                                     '--tf_xla_cpu_global_jit'
-        # Reduce logging
-        # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-
-        import tensorflow as tf
-
-        from tagger.generator.tf_data_reader import DataGenerator
-
-        # tensorflow maps nearly all vram by default, so we limit this
-        # https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
-        # TODO: only run on the first run
-        gpus = tf.config.experimental.list_physical_devices("GPU")
-        if gpus:
-            for device in gpus:
-                try:
-                    tf.config.experimental.set_memory_growth(device, True)
-                except RuntimeError as err:
-                    print(err)
-
-        if dry_run:  # dry run
-            height, width = 224, 224
-            process_images = self.dry_run(images)
-        else:
-            _, height, width, _ = self.model.inputs[0].shape
-
-            @tf.function
-            def pred_model(model):
-                return self.model(model, training=False)
-
-            process_images = self.run(images, pred_model)
-
-        generator = DataGenerator(
-            file_list=images, target_height=height, target_width=width,
-            batch_size=getattr(shared.opts, 'tagger_batch_size', 1024)
-        ).gen_ds()
-
-        orig_add_tags = QData.add_tags
-        for filepaths, image_list in tqdm(generator):
-            process_images(filepaths, image_list)
-        QData.add_tag = orig_add_tags
-        del os.environ["TF_XLA_FLAGS"]
