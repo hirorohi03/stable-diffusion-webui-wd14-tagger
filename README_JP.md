@@ -1,37 +1,37 @@
 # Tagger for [Stable Diffusion WebUI Forge - Neo & Classic](https://github.com/Haoming02/sd-webui-forge-classic)
 
-[日本語版はこちら (README_JP.md)](README_JP.md)
+[English README is here](README.md)
 
-This repository is a fork based on 67372a's [stable-diffusion-webui-wd14-tagger](https://github.com/67372a/stable-diffusion-webui-wd14-tagger).<BR>
+このリポジトリは、67372a氏の [stable-diffusion-webui-wd14-tagger](https://github.com/67372a/stable-diffusion-webui-wd14-tagger) をもとにしたforkです。<BR>
 
-I'm sorry for creating yet another fork of Tagger.<BR>
-However, this fork will help those who have been struggling because they couldn't use Tagger on Forge Neo.<P>
+Taggerのforkをまた増やしてしまい、申し訳ありません。<BR>
+しかしこのforkは、Forge NeoでTaggerを使用できず困っていた方々の役に立つはずです。<P>
 
-In this fork I have removed unused and unnecessary features that were preventing it from running on Forge Neo.<BR>
-Since this fork does not use `tensorflow` (which conflicts with the version of `protobuf` required by the WebUI), I believe this fork is useful even on A1111/Forge/reForge.
+このforkでは、Forge Neoでの実行を妨げていた、未使用かつ不要な機能を削除しました。<BR>
+また、このforkは `tensorflow` を使用していないため（`tensorflow` が要求する `protobuf` のバージョンはWebUIの要求と競合します）、A1111/Forge/reForge でも有用であると考えます。
 
-## Fork changes
+## このforkの変更内容
 
-### Fixed
+### 修正内容
 
-- I have fixed code that relied on Deepbooru Interrogator which is not included in Forge Neo, as well as code that was incompatible with the UI.
+- Forge Neoにおいて削除されたDeepbooru Interrogatorに依存していたコードや、古くて互換性のないコードを修正しました。
 
-### Removed Features
+### 削除した機能
 
 - `tensorflow`
-   - The version of `protobuf` required by `tensorflow` is not compatible with the version of `protobuf` required by the WebUI.
-   - In the original tagger, `tensorflow` is installed solely for experimental features available only in `tensorflow 2.10` and for DeepDanbooruInterrogator.
-- `deepdanbooru` & DeepDanbooruInterrogator
-   - No one uses this anymore, right?
-   - Instead, please use WaifuDiffusionInterrogator, MLDanbooruInterrogator, or Z3DInterrogator.
+   - `tensorflow` が要求する `protobuf` のバージョンは、WebUIが要求する `protobuf` のバージョンと互換性がありません。
+   - オリジナルのTaggerでは、`tensorflow` は `tensorflow 2.10` でのみ利用可能な実験的機能と、DeepDanbooruInterrogatorのためにのみインストールされています。
+- `deepdanbooru` とDeepDanbooruInterrogator
+   - もう誰も使ってないですよね？
+   - 代わりに、WaifuDiffusionInterrogator、MLDanbooruInterrogator、Z3DInterrogatorを利用してください。
 - `opencv_python_headless`
-   - `opencv_python` and `opencv_python_headless` conflict during installation. Since `opencv_python` is pre-installed on Forge Neo, `opencv_python_headless` is not required.
+   - `opencv_python` と `opencv_python_headless` はインストール時に競合します。Forge Neo には `opencv_python` がインストールされているため、`opencv_python_headless` は不要です。
 
-After migrating from another Tagger to this one, you can remove them using `pip uninstall`, provided you are not using `tensorflow`, `deepdanbooru` or `opencv_python_headless` with other tools.
+別のTaggerからこのTaggerに移行した場合、`tensorflow`, `deepdanbooru`, `opencv_python_headless` は他で使用していなければ `pip uninstall` で削除して大丈夫です。
 
 ---
 
-The following is the README provided by the original repository.
+以下は、元のリポジトリが提供しているREADMEです。
 
 ---
 ## Fork changes
