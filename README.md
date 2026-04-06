@@ -1,3 +1,34 @@
+# Tagger for [Stable Diffusion WebUI Forge - Neo & Classic](https://github.com/Haoming02/sd-webui-forge-classic)
+
+This repository is a fork based on 67372a's [stable-diffusion-webui-wd14-tagger](https://github.com/67372a/stable-diffusion-webui-wd14-tagger).<BR>
+
+I'm sorry for creating yet another fork of Tagger.<BR>
+However, this fork will help those who have been struggling because they couldn't use Tagger on Forge Neo.<P>
+
+In this fork I have removed unused and unnecessary features that were preventing it from running on Forge Neo.<BR>
+Since this fork does not use `tensorflow` (which conflicts with the version of `protobuf` required by the WebUI), I believe this fork is useful even on A1111/Forge/reForge.
+
+## Fork changes
+
+### Fixed
+
+- I have fixed code that relied on Deepbooru Interrogator which is not included in Forge Neo, as well as code that was incompatible with the UI.
+
+### Removed Features
+
+- `tensorflow`
+   - The version of `protobuf` required by `tensorflow` is not compatible with the version of `protobuf` required by the WebUI.
+   - In the original tagger, `tensorflow` is installed solely for experimental features available only in `tensorflow 2.10` and for DeepDanbooruInterrogator.
+- `deepdanbooru` & DeepDanbooruInterrogator
+   - No one uses this anymore, right?
+   - Instead, please use WaifuDiffusionInterrogator, MLDanbooruInterrogator, or Z3DInterrogator.
+- `opencv_python_headless`
+   - `opencv_python` and `opencv_python_headless` conflict during installation. Since `opencv_python` is pre-installed on Forge Neo, `opencv_python_headless` is not required.
+---
+
+The following is the README provided by the original repository.
+
+---
 ## Fork changes
 - v3 taggers added
 - Z3D-E621-Convnext tagger added
