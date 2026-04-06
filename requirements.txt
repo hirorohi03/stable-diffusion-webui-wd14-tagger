@@ -1,11 +1,9 @@
 jsonschema
 fastapi
-gradio
 huggingface_hub
 numpy
 opencv_contrib_python
 opencv_python
-opencv_python_headless
 packaging
 pandas
 Pillow
