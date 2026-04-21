@@ -29,6 +29,13 @@ Since this fork does not use `tensorflow` (which conflicts with the version of `
 
 After migrating from another Tagger to this one, you can remove them using `pip uninstall`, provided you are not using `tensorflow`, `deepdanbooru` or `opencv_python_headless` with other tools.
 
+## Changelog
+
+### 2026/4/20
+
+- Added a version constraint of `<4.12` to the `opencv_python` and `opencv_contrib_python` lines in `requirements.txt`.
+   - If the version of `opencv_python` or `opencv_contrib_python` is 4.12 or higher, `numpy` will be updated to 2.x, which causes issues like ControlNet errors in WebUIs using `gradio 3.x` (Forge Neo is not affected as it uses `gradio 4.x`).
+
 ---
 
 The following is the README provided by the original repository.

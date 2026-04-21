@@ -29,6 +29,13 @@ Taggerのforkをまた増やしてしまい、申し訳ありません。<BR>
 
 別のTaggerからこのTaggerに移行した場合、`tensorflow`, `deepdanbooru`, `opencv_python_headless` は他で使用していなければ `pip uninstall` で削除して大丈夫です。
 
+## 更新履歴
+
+### 2026/4/20
+
+- `requirements.txt` の `opencv_python` と `opencv_contrib_python` の行に `<4.12` の指定を追加
+   - `opencv_python` または `opencv_contrib_python` のバージョンが4.12以上になると `numpy` が 2.x にアップデートされ、`gradio 3.x` を利用するWebUIではControlNetエラーなどの問題が発生します（Forge Neoは `gradio 4.x` を利用しているため問題ありません）。
+
 ---
 
 以下は、元のリポジトリが提供しているREADMEです。
