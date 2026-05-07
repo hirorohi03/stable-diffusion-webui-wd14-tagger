@@ -10,7 +10,7 @@ from packaging import version
 from html import escape as html_esc
 
 from modules import ui  # pylint: disable=import-error
-from modules import generation_parameters_copypaste as parameters_copypaste  # pylint: disable=import-error # noqa
+from modules import infotext_utils as parameters_copypaste  # pylint: disable=import-error # noqa
 
 try:
     from modules.call_queue import wrap_gradio_gpu_call
