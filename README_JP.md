@@ -31,6 +31,11 @@ Taggerのforkをまた増やしてしまい、申し訳ありません。<BR>
 
 ## 更新履歴
 
+### 2026/5/7
+
+- `generation_parameters_copypaste` を `infotext_utils` に変更
+   - Forge Neoのコミット[e40900c](https://github.com/Haoming02/sd-webui-forge-classic/commit/e40900cd8bf7275d89dd01c534108661960f38f3) (2026/5/5更新) で `generation_parameters_copypaste` が削除されたため。
+
 ### 2026/4/20
 
 - `requirements.txt` の `opencv_python` と `opencv_contrib_python` の行に `<4.12` の指定を追加

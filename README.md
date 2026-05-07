@@ -31,6 +31,11 @@ After migrating from another Tagger to this one, you can remove them using `pip 
 
 ## Changelog
 
+### 2026/5/7
+
+- Replace `generation_parameters_copypaste` with `infotext_utils`.
+   - This is because `generation_parameters_copypaste` was removed in Forge Neo commit [e40900c](https://github.com/Haoming02/sd-webui-forge-classic/commit/e40900cd8bf7275d89dd01c534108661960f38f3) (updated May 5, 2026).
+
 ### 2026/4/20
 
 - Added a version constraint of `<4.12` to the `opencv_python` and `opencv_contrib_python` lines in `requirements.txt`.
