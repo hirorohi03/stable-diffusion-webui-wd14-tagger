@@ -1,6 +1,18 @@
+<p align="center">
+🌍
+<strong>English</strong> |
+<a href="./README_JP.md">日本語</a> |
+</p>
+
+---
+
+<div align="center">
+
 # Tagger for [Stable Diffusion WebUI Forge - Neo & Classic](https://github.com/Haoming02/sd-webui-forge-classic)
 
-[日本語版はこちら (README_JP.md)](README_JP.md)
+---
+
+</div>
 
 This repository is a fork based on 67372a's [stable-diffusion-webui-wd14-tagger](https://github.com/67372a/stable-diffusion-webui-wd14-tagger).<BR>
 
@@ -30,6 +42,10 @@ Since this fork does not use `tensorflow` (which conflicts with the version of `
 After migrating from another Tagger to this one, you can remove them using `pip uninstall`, provided you are not using `tensorflow`, `deepdanbooru` or `opencv_python_headless` with other tools.
 
 ## Changelog
+
+### 2026/5/30
+
+- Handle missing use_cpu option in Forge Neo
 
 ### 2026/5/7
 
